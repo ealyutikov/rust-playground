@@ -1,5 +1,8 @@
+// https://adventofcode.com/2020/day/1
+
 use std::{collections::HashSet, fs};
 
+#[allow(dead_code)]
 fn main_d01() -> Result<i64, String> {
   let target = 2020;
   fs::read_to_string("inputs/d01.txt")
