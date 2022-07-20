@@ -1,24 +1,27 @@
 use std::{collections::HashSet, fs};
 
-fn main_d01() -> i64 {
-  let string = fs::read_to_string("inputs/d01.txt").expect("unable to read file");
+fn main_d01() -> Result<i64, String> {
+  let target = 2020;
+  fs::read_to_string("inputs/d01.txt")
+    .map_err(|error| error.to_string())
+    .and_then(|string| {
+      let (numbers, errors) = parse_vectors(string, "\n");
 
-  let (numbers, errors) = parse_vectors(string, "\n");
+      if !errors.is_empty() {
+        dbg!(errors);
+      }
 
-  if !errors.is_empty() {
-    dbg!(errors);
-  }
-
-  find_solution(numbers, 2020).unwrap()
+      find_solution(numbers, target)
+    })
 }
 
-fn find_solution(numbers: Vec<i64>, goal: i64) -> Result<i64, String> {
+fn find_solution(numbers: Vec<i64>, target: i64) -> Result<i64, String> {
   let set: HashSet<i64> = HashSet::from_iter(numbers.iter().cloned());
 
   let result: Vec<(i64, &i64)> = numbers
     .into_iter()
     .flat_map(|n| {
-      let y = goal - n;
+      let y = target - n;
       set.get(&y).map(|f| (n, f))
     })
     .collect();
@@ -47,7 +50,7 @@ mod test {
   use super::*;
 
   #[test]
-  fn parse_vactor_works() {
+  fn parse_vector_works() {
     let input = "1721, 979, 366, 299, 675, 1456".to_string();
     let expected = vec![1721, 979, 366, 299, 675, 1456];
     let (numbers, errors) = parse_vectors(input, ", ");
@@ -57,7 +60,7 @@ mod test {
   }
 
   #[test]
-  fn parse_vactor_error() {
+  fn parse_vector_with_error_works() {
     let input = "1721, 979, 366, 299, cat".to_string();
     let expected = vec![1721, 979, 366, 299];
     let (numbers, errors) = parse_vectors(input, ", ");
@@ -67,8 +70,18 @@ mod test {
   }
 
   #[test]
-  fn check_solution() {
+  fn find_solution_works() {
+    let numbers = vec![1721, 979, 366, 299, 675, 1456];
+    let target = 2020;
+    let expected = 514579;
+    let result = find_solution(numbers, target);
+
+    assert_eq!(result, Ok(expected));
+  }
+
+  #[test]
+  fn main_works() {
     let result = main_d01();
-    assert_eq!(result, 1015476);
+    assert_eq!(result, Ok(1015476));
   }
 }
